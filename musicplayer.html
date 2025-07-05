@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Music Player</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background-color: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Arial', sans-serif;
+  }
+  .music-player {
+    background: #333;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    width: 350px;
+    max-width: 90%;
+    color: #fff;
+  }
+  .song-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .cover {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-right: 15px;
+  }
+  .details {
+    flex: 1;
+  }
+  .title {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+  }
+  .artist {
+    font-size: 0.9em;
+    color: #aaa;
+  }
+  .controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+  .btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2em;
+    margin: 0 15px;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  .btn:hover {
+    color: #1db954;
+  }
+  .progress-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .current-time, .duration {
+    font-size: 0.8em;
+    width: 40px;
+    text-align: center;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #555;
+    border-radius: 4px;
+    margin: 0 10px;
+    cursor: pointer;
+    position: relative;
+  }
+  .progress {
+    height: 100%;
+    width: 0%;
+    background: #1db954;
+    border-radius: 4px 0 0 4px;
+  }
+  .volume-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #volume {
+    margin-left: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="music-player">
+  <!-- Song Info -->
+  <div class="song-info">
+    <img src="https://via.placeholder.com/70" alt="Album Cover" class="cover" id="cover" />
+    <div class="details">
+      <h2 id="song-title" class="title">Song Title</h2>
+      <p id="artist" class="artist">Artist Name</p>
+    </div>
+  </div>
+
+  <!-- Audio Element -->
+  <audio id="audio"></audio>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn" id="prev">⏮️</button>
+    <button class="btn" id="play">▶️</button>
+    <button class="btn" id="next">⏭️</button>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-container">
+    <span class="time current-time">0:00</span>
+    <div class="progress-bar" id="progress-bar">
+      <div class="progress" id="progress"></div>
+    </div>
+    <span class="time duration" id="duration">0:00</span>
+  </div>
+
+  <!-- Volume Control -->
+  <div class="volume-control">
+    <label for="volume">🔊</label>
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5" />
+  </div>
+</div>
+
+<script>
+const playlist = [
+  {
+    title: "Song One",
+    artist: "Artist A",
+    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    cover: "https://via.placeholder.com/70?text=Cover+1",
+  },
+  {
+    title: "Song Two",
+    artist: "Artist B",
+    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    cover: "https://via.placeholder.com/70?text=Cover+2",
+  },
+  {
+    title: "Song Three",
+    artist: "Artist C",
+    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    cover: "https://via.placeholder.com/70?text=Cover+3",
+  },
+];
+
+let currentTrackIndex = 0;
+
+const audio = document.getElementById('audio');
+const playBtn = document.getElementById('play');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+
+const songTitle = document.getElementById('song-title');
+const artist = document.getElementById('artist');
+const cover = document.getElementById('cover');
+
+const progress = document.getElementById('progress');
+const progressBar = document.getElementById('progress-bar');
+const currentTimeEl = document.querySelector('.current-time');
+const durationEl = document.getElementById('duration');
+
+const volumeSlider = document.getElementById('volume');
+
+let isPlaying = false;
+
+// Load initial song
+loadSong(currentTrackIndex);
+
+// Functions
+function loadSong(index) {
+  const song = playlist[index];
+  audio.src = song.src;
+  songTitle.textContent = song.title;
+  artist.textContent = song.artist;
+  cover.src = song.cover;
+  audio.load();
+}
+
+function playSong() {
+  audio.play();
+  isPlaying = true;
+  playBtn.textContent = '⏸️';
+}
+
+function pauseSong() {
+  audio.pause();
+  isPlaying = false;
+  playBtn.textContent = '▶️';
+}
+
+playBtn.addEventListener('click', () => {
+  if (isPlaying) {
+    pauseSong();
+  } else {
+    playSong();
+  }
+});
+
+// Next & Previous
+prevBtn.addEventListener('click', () => {
+  currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+  loadSong(currentTrackIndex);
+  playSong();
+});
+
+nextBtn.addEventListener('click', () => {
+  currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+  loadSong(currentTrackIndex);
+  playSong();
+});
+
+// Update progress
+audio.addEventListener('timeupdate', () => {
+  const { currentTime, duration } = audio;
+  const progressPercent = (currentTime / duration) * 100;
+  progress.style.width = progressPercent + '%';
+
+  // Update current time display
+  currentTimeEl.textContent = formatTime(currentTime);
+  // Update duration display if available
+  if (duration) {
+    durationEl.textContent = formatTime(duration);
+  }
+});
+
+// Seek in progress bar
+progressBar.addEventListener('click', (e) => {
+  const width = progressBar.offsetWidth;
+  const clickX = e.offsetX;
+  const duration = audio.duration;
+  audio.currentTime = (clickX / width) * duration;
+});
+
+// Volume control
+volumeSlider.addEventListener('input', () => {
+  audio.volume = volumeSlider.value;
+});
+
+// Auto-play next song when current ends
+audio.addEventListener('ended', () => {
+  currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+  loadSong(currentTrackIndex);
+  playSong();
+});
+
+// Utility to format time
+function formatTime(time) {
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+}
+</script>
+</body>
+</html>
